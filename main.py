@@ -32,7 +32,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     user_data[chat_id] = {profile: 0 for profile in profiles}
     
-    # Встановлюємо стан першого питання
     context.user_data['state'] = QUESTION1
 
     await update.message.reply_text(
@@ -45,7 +44,6 @@ async def handle_question(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     text = update.message.text
 
-    # Додаємо бали відповідно до відповіді
     for profile in profiles:
         if profile.lower() in text.lower():
             user_data[chat_id][profile] += 1
@@ -61,7 +59,6 @@ async def handle_question(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data['state'] = next_state
         return next_state
     else:
-        # Завершення тесту
         top_profile = max(user_data[chat_id], key=user_data[chat_id].get)
         role = {
             "Програмування": "Software Engineer",
@@ -98,7 +95,12 @@ def main():
 
     app.add_handler(conv_handler)
 
-    app.run_polling()
+    # Запускаємо через webhook для Render
+    app.run_webhook(
+        listen="0.0.0.0",
+        port=int(os.environ.get('PORT', 8443)),
+        webhook_url=f"https://{os.environ['RENDER_EXTERNAL_HOSTNAME']}/{token}"
+    )
 
 if __name__ == '__main__':
     main()
