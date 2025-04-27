@@ -2,7 +2,7 @@ from telegram import Update, ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes, ConversationHandler
 import os
 
-# Стадії тесту
+# Етапи тесту
 QUESTION1, QUESTION2, QUESTION3, QUESTION4, QUESTION5 = range(5)
 
 # Питання та відповідні клавіатури
@@ -25,7 +25,7 @@ keyboards = {
 # Профілі
 profiles = ["Програмування", "Кібербезпека", "Аналіз даних", "Комп'ютерні мережі"]
 
-# Пам'ять відповідей
+# Дані користувача
 user_data = {}
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -68,7 +68,7 @@ async def handle_question(update: Update, context: ContextTypes.DEFAULT_TYPE):
         }[top_profile]
 
         await update.message.reply_text(
-            f"Вітаємо! 🎉 Ти — майбутній {role}!\n\nБільше інформації тут 👉 https://fcst.nau.edu.ua/1st-course/",
+            f"Вітаємо! 🎉 Ти — майбутній {role}!\n\nДізнатись більше 👉 https://fcst.nau.edu.ua/1st-course/",
             reply_markup=ReplyKeyboardRemove()
         )
         return ConversationHandler.END
@@ -95,7 +95,7 @@ def main():
 
     app.add_handler(conv_handler)
 
-    # Запускаємо через webhook для Render
+    # Використовуємо webhook для роботи на Render
     app.run_webhook(
         listen="0.0.0.0",
         port=int(os.environ.get('PORT', 8443)),
