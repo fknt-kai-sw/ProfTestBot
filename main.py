@@ -5,27 +5,38 @@ import os
 # Стадії тесту
 QUESTION1, QUESTION2, QUESTION3, QUESTION4, QUESTION5 = range(5)
 
-# Клавіатури для кожного питання
+# Питання та відповідні клавіатури
+questions_text = {
+    QUESTION1: "Що тобі більше подобається?",
+    QUESTION2: "Який проєкт ти б хотів реалізувати?",
+    QUESTION3: "Як тобі зручніше працювати?",
+    QUESTION4: "Які дисципліни тобі цікавіше вивчати?",
+    QUESTION5: "Яку суперсилу ти б вибрав?"
+}
+
 keyboards = {
     QUESTION1: [["Програмування", "Кібербезпека"], ["Аналіз даних", "Комп'ютерні мережі"]],
     QUESTION2: [["Мобільний додаток", "Система захисту даних"], ["Аналітична система", "Інтернет мережа"]],
-    QUESTION3: [["Командна робота", "Один в полі воїн"], ["Тестування технологій", "Логічні задачі"]],
+    QUESTION3: [["Командна робота", "Індивідуальні завдання"]],
     QUESTION4: [["Алгоритми", "Криптографія"], ["Мережі", "Машинне навчання"]],
-    QUESTION5: [["Створювати програми", "Хакати хакерів"], ["Керувати даними", "Будувати мережі"]]
+    QUESTION5: [["Створювати програми", "Захищати дані"], ["Керувати даними", "Будувати мережі"]]
 }
 
-# Підрахунок балів для профілів
+# Профілі
 profiles = ["Програмування", "Кібербезпека", "Аналіз даних", "Комп'ютерні мережі"]
 
-# Пам'ять для відповідей користувача
+# Пам'ять відповідей
 user_data = {}
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     user_data[chat_id] = {profile: 0 for profile in profiles}
     
+    # Встановлюємо стан першого питання
+    context.user_data['state'] = QUESTION1
+
     await update.message.reply_text(
-        "Привіт! Пройди короткий тест і дізнайся, хто ти в ІТ 👨‍💻👩‍💻",
+        f"Привіт! 👋 Давай визначимо, хто ти в ІТ! 🚀\n\n{questions_text[QUESTION1]}",
         reply_markup=ReplyKeyboardMarkup(keyboards[QUESTION1], one_time_keyboard=True, resize_keyboard=True)
     )
     return QUESTION1
@@ -34,7 +45,7 @@ async def handle_question(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     text = update.message.text
 
-    # Підвищуємо бал профілю, якщо така відповідь є
+    # Додаємо бали відповідно до відповіді
     for profile in profiles:
         if profile.lower() in text.lower():
             user_data[chat_id][profile] += 1
@@ -44,12 +55,13 @@ async def handle_question(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if next_state <= QUESTION5:
         await update.message.reply_text(
-            "Наступне питання:",
+            questions_text[next_state],
             reply_markup=ReplyKeyboardMarkup(keyboards[next_state], one_time_keyboard=True, resize_keyboard=True)
         )
         context.user_data['state'] = next_state
         return next_state
     else:
+        # Завершення тесту
         top_profile = max(user_data[chat_id], key=user_data[chat_id].get)
         role = {
             "Програмування": "Software Engineer",
@@ -59,7 +71,7 @@ async def handle_question(update: Update, context: ContextTypes.DEFAULT_TYPE):
         }[top_profile]
 
         await update.message.reply_text(
-            f"Вітаємо! 🎉 Ти — майбутній {role}!\n\nБільше про навчання: https://fcst.nau.edu.ua/1st-course/",
+            f"Вітаємо! 🎉 Ти — майбутній {role}!\n\nБільше інформації тут 👉 https://fcst.nau.edu.ua/1st-course/",
             reply_markup=ReplyKeyboardRemove()
         )
         return ConversationHandler.END
