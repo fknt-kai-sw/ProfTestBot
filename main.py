@@ -22,10 +22,10 @@ keyboards = {
     QUESTION5: [["Створювати програми", "Захищати дані"], ["Керувати даними", "Будувати мережі"]]
 }
 
-# Профілі для підрахунку
+# Профілі
 profiles = ["Програмування", "Кібербезпека", "Аналіз даних", "Комп'ютерні мережі"]
 
-# Дані користувачів
+# Пам'ять відповідей користувача
 user_data = {}
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -95,12 +95,11 @@ def main():
 
     app.add_handler(conv_handler)
 
-    # Правильний запуск Webhook
+    # Правильний запуск webhook без токена в шляху
     app.run_webhook(
         listen="0.0.0.0",
         port=int(os.environ.get('PORT', 8443)),
-        webhook_url=f"https://{os.environ['RENDER_EXTERNAL_HOSTNAME']}/{token}",
-        path=f"/{token}"  # Додаємо path
+        webhook_url=f"https://{os.environ['RENDER_EXTERNAL_HOSTNAME']}"
     )
 
 if __name__ == '__main__':
