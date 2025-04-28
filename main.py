@@ -2,10 +2,10 @@ from telegram import Update, ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes, ConversationHandler
 import os
 
-# Етапи тесту
+# Стадії тесту
 QUESTION1, QUESTION2, QUESTION3, QUESTION4, QUESTION5 = range(5)
 
-# Питання та відповідні клавіатури
+# Питання і варіанти відповідей
 questions_text = {
     QUESTION1: "Що тобі більше подобається?",
     QUESTION2: "Який проєкт ти б хотів реалізувати?",
@@ -22,10 +22,10 @@ keyboards = {
     QUESTION5: [["Створювати програми", "Захищати дані"], ["Керувати даними", "Будувати мережі"]]
 }
 
-# Профілі
+# Профілі для підрахунку
 profiles = ["Програмування", "Кібербезпека", "Аналіз даних", "Комп'ютерні мережі"]
 
-# Дані користувача
+# Дані користувачів
 user_data = {}
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -68,7 +68,7 @@ async def handle_question(update: Update, context: ContextTypes.DEFAULT_TYPE):
         }[top_profile]
 
         await update.message.reply_text(
-            f"Вітаємо! 🎉 Ти — майбутній {role}!\n\nДізнатись більше 👉 https://fcst.nau.edu.ua/1st-course/",
+            f"Вітаємо! 🎉 Ти — майбутній {role}!\n\nБільше інформації тут 👉 https://fcst.nau.edu.ua/1st-course/",
             reply_markup=ReplyKeyboardRemove()
         )
         return ConversationHandler.END
@@ -95,11 +95,12 @@ def main():
 
     app.add_handler(conv_handler)
 
-    # Використовуємо webhook для роботи на Render
+    # Правильний запуск Webhook
     app.run_webhook(
         listen="0.0.0.0",
         port=int(os.environ.get('PORT', 8443)),
-        webhook_url=f"https://{os.environ['RENDER_EXTERNAL_HOSTNAME']}/{token}"
+        webhook_url=f"https://{os.environ['RENDER_EXTERNAL_HOSTNAME']}/{token}",
+        path=f"/{token}"  # Додаємо path
     )
 
 if __name__ == '__main__':
