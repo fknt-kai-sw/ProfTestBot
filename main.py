@@ -5,27 +5,36 @@ import os
 # Стадії тесту
 QUESTION1, QUESTION2, QUESTION3, QUESTION4, QUESTION5 = range(5)
 
-# Питання і варіанти відповідей
+# Оновлені питання
 questions_text = {
-    QUESTION1: "Що тобі більше подобається?",
-    QUESTION2: "Який проєкт ти б хотів реалізувати?",
-    QUESTION3: "Як тобі зручніше працювати?",
-    QUESTION4: "Які дисципліни тобі цікавіше вивчати?",
-    QUESTION5: "Яку суперсилу ти б вибрав?"
+    QUESTION1: "Що тебе найбільше захоплює у світі ІТ?",
+    QUESTION2: "Який проєкт ти мрієш реалізувати?",
+    QUESTION3: "Як тобі зручніше працювати в команді?",
+    QUESTION4: "Який тип завдань приносить тобі найбільше задоволення?",
+    QUESTION5: "Якою суперсилою ти б хотів володіти в ІТ?"
 }
 
+# Оновлені варіанти відповідей
 keyboards = {
-    QUESTION1: [["Програмування", "Кібербезпека"], ["Аналіз даних", "Комп'ютерні мережі"]],
-    QUESTION2: [["Мобільний додаток", "Система захисту даних"], ["Аналітична система", "Інтернет мережа"]],
-    QUESTION3: [["Командна робота", "Індивідуальні завдання"]],
-    QUESTION4: [["Алгоритми", "Криптографія"], ["Мережі", "Машинне навчання"]],
-    QUESTION5: [["Створювати програми", "Захищати дані"], ["Керувати даними", "Будувати мережі"]]
+    QUESTION1: [["Писати код", "Захищати дані"], ["Аналізувати інформацію", "Будувати мережі"]],
+    QUESTION2: [["Розробити мобільний додаток", "Створити систему захисту"], ["Побудувати аналітичну платформу", "Налаштувати складну мережу"], ["Обробляти зображення", "Розробити вбудовану систему"], ["Підтримувати сервери"]],
+    QUESTION3: [["Співпрацювати в команді", "Працювати самостійно"]],
+    QUESTION4: [["Структури даних і алгоритми", "Кіберзахист і криптографія"], ["Архітектура комп'ютерних мереж", "Штучний інтелект і машинне навчання"], ["Комп'ютерний зір", "Вбудовані системи"]],
+    QUESTION5: [["Створювати інноваційні програми", "Зупиняти кібератаки"], ["Відкривати закономірності в даних", "Створювати мережеву інфраструктуру"], ["Обробляти відео- та фотодані", "Проєктувати електронні пристрої"], ["Адмініструвати сервери"]]
 }
 
 # Профілі
-profiles = ["Програмування", "Кібербезпека", "Аналіз даних", "Комп'ютерні мережі"]
+profiles = [
+    "Програмування",
+    "Захист інформації",
+    "Аналіз даних",
+    "Комп'ютерні мережі",
+    "Комп'ютерний зір",
+    "Вбудовані системи",
+    "Системне адміністрування"
+]
 
-# Пам'ять відповідей користувача
+# Пам'ять відповідей користувачів
 user_data = {}
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -42,11 +51,23 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def handle_question(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
-    text = update.message.text
+    text = update.message.text.lower()
 
-    for profile in profiles:
-        if profile.lower() in text.lower():
-            user_data[chat_id][profile] += 1
+    # Підрахунок балів
+    if any(kw in text for kw in ["код", "мобільний додаток", "структури даних", "інноваційні програми"]):
+        user_data[chat_id]["Програмування"] += 1
+    if any(kw in text for kw in ["захист", "кібератаки", "кіберзахист", "система захисту"]):
+        user_data[chat_id]["Захист інформації"] += 1
+    if any(kw in text for kw in ["аналіз", "аналітична платформа", "машинне навчання", "дані"]):
+        user_data[chat_id]["Аналіз даних"] += 1
+    if any(kw in text for kw in ["мережа", "інтернет", "мережева інфраструктура", "архітектура мереж"]):
+        user_data[chat_id]["Комп'ютерні мережі"] += 1
+    if any(kw in text for kw in ["зображення", "комп'ютерний зір", "відео", "фото"]):
+        user_data[chat_id]["Комп'ютерний зір"] += 1
+    if any(kw in text for kw in ["вбудована система", "вбудовані системи", "електронні пристрої"]):
+        user_data[chat_id]["Вбудовані системи"] += 1
+    if any(kw in text for kw in ["сервери", "адмініструвати", "системний адміністратор"]):
+        user_data[chat_id]["Системне адміністрування"] += 1
 
     current_state = context.user_data.get('state', QUESTION1)
     next_state = current_state + 1
@@ -62,9 +83,12 @@ async def handle_question(update: Update, context: ContextTypes.DEFAULT_TYPE):
         top_profile = max(user_data[chat_id], key=user_data[chat_id].get)
         role = {
             "Програмування": "Software Engineer",
-            "Кібербезпека": "Фахівець з кібербезпеки",
+            "Захист інформації": "Information Security Specialist",
             "Аналіз даних": "Data Scientist",
-            "Комп'ютерні мережі": "Network Engineer"
+            "Комп'ютерні мережі": "Network Engineer",
+            "Комп'ютерний зір": "Computer Vision Engineer",
+            "Вбудовані системи": "Embedded Systems Engineer",
+            "Системне адміністрування": "System Administrator"
         }[top_profile]
 
         await update.message.reply_text(
@@ -95,7 +119,6 @@ def main():
 
     app.add_handler(conv_handler)
 
-    # Правильний запуск webhook без токена в шляху
     app.run_webhook(
         listen="0.0.0.0",
         port=int(os.environ.get('PORT', 8443)),
